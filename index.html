@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Reproductor</title>
-
 <style>
 *{
     margin:0;
@@ -19,32 +17,10 @@ body{
     justify-content:center;
     align-items:center;
     height:100vh;
-    font-family:Arial, Helvetica, sans-serif;
-}
-
-.player{
-    width:320px;
-    background:rgba(255,255,255,.18);
-    backdrop-filter:blur(15px);
-    border-radius:20px;
-    padding:15px;
-    box-shadow:0 8px 25px rgba(0,0,0,.25);
-}
-
-h2{
-    text-align:center;
-    color:white;
-    margin-bottom:5px;
-}
-
-p{
-    text-align:center;
-    color:#f0f0f0;
-    margin-bottom:12px;
 }
 
 audio{
-    width:100%;
+    width:320px;
     height:40px;
 }
 </style>
@@ -53,17 +29,13 @@ audio{
 
 <body>
 
-<div class="player">
-
-<h2>🎵 Nuestra canción</h2>
-<p>XV Años</p>
-
 <audio controls autoplay loop>
     <source src="PLAY.mp3" type="audio/mpeg">
     Tu navegador no soporta audio.
 </audio>
 
-</div>
+</body>
+</html>
 
 </body>
 </html>
