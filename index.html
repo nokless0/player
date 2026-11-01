@@ -1,41 +1,95 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
-body{
-    background:transparent;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-}
-
-audio{
-    width:320px;
-    height:40px;
-}
-</style>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reproductor de la invitación</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --rosa: #ec4899; --rosa-claro: #fce7f3; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: transparent; }
+    body { display: grid; place-items: center; padding: 10px; font-family: "Poppins", sans-serif; }
+    .player {
+      display: flex; align-items: center; gap: 12px;
+      width: min(100%, 360px); min-height: 64px; padding: 9px 15px 9px 10px;
+      border: 1px solid rgba(236, 72, 153, .20);
+      border-radius: 999px; background: rgba(255, 255, 255, .84);
+      box-shadow: 0 8px 22px rgba(236, 72, 153, .16);
+      -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    }
+    .play {
+      flex: 0 0 44px; width: 44px; height: 44px; border: 0; border-radius: 50%;
+      background: var(--rosa); color: white; display: grid; place-items: center;
+      cursor: pointer; box-shadow: 0 3px 9px rgba(236, 72, 153, .25);
+    }
+    .play:focus-visible, .progress:focus-visible { outline: 3px solid #f9a8d4; outline-offset: 3px; }
+    .play svg { width: 20px; height: 20px; fill: currentColor; }
+    .play:disabled { opacity: .55; cursor: not-allowed; }
+    .details { min-width: 0; flex: 1; display: grid; gap: 3px; }
+    .title { color: #9d174d; font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .progress { width: 100%; margin: 0; cursor: pointer; accent-color: var(--rosa); }
+    .times { display: flex; justify-content: space-between; gap: 8px; font-size: 10px; color: #9d6b7f; font-variant-numeric: tabular-nums; }
+    .times span { white-space: nowrap; }
+    audio { display: none; }
+  </style>
 </head>
-
 <body>
+  <div class="player" role="group" aria-label="Reproductor de audio de la invitación">
+    <button id="play" class="play" type="button" aria-label="Reproducir audio">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path id="symbol" d="M8 5v14l11-7z"/></svg>
+    </button>
+    <div class="details">
+      <span class="title" id="title">♫ Dale play para escuchar</span>
+      <input id="progress" class="progress" type="range" min="0" max="100" value="0" step="0.1" aria-label="Posición del audio">
+      <div class="times"><span id="now">0:00</span><span id="total">0:00</span></div>
+    </div>
+    <audio id="audio" preload="metadata">
+      <source src="https://raw.githubusercontent.com/nokless0/player/main/invitacion.mp3" type="audio/mpeg">
+      Tu navegador no soporta audio.
+    </audio>
+  </div>
+  <script>
+    const audio = document.getElementById("audio");
+    const btn = document.getElementById("play");
+    const symbol = document.getElementById("symbol");
+    const slider = document.getElementById("progress");
+    const now = document.getElementById("now");
+    const total = document.getElementById("total");
+    const title = document.getElementById("title");
+    const fmt = sec => Number.isFinite(sec) ? Math.floor(sec / 60) + ":" + String(Math.floor(sec % 60)).padStart(2, "0") : "0:00";
 
-<audio controls autoplay loop>
-    <source src="PLAY.mp3" type="audio/mpeg">
-    Tu navegador no soporta audio.
-</audio>
-
-</body>
-</html>
-
+    function updateButton() {
+      const playing = !audio.paused && !audio.ended;
+      symbol.setAttribute("d", playing ? "M6 5h4v14H6zm8 0h4v14h-4z" : "M8 5v14l11-7z");
+      btn.setAttribute("aria-label", playing ? "Pausar audio" : "Reproducir audio");
+    }
+    btn.addEventListener("click", async () => {
+      if (!audio.paused) audio.pause();
+      else {
+        try { await audio.play(); }
+        catch { title.textContent = "No se pudo reproducir el audio"; }
+      }
+      updateButton();
+    });
+    audio.addEventListener("play", updateButton);
+    audio.addEventListener("pause", updateButton);
+    audio.addEventListener("ended", () => { updateButton(); slider.value = "0"; });
+    audio.addEventListener("loadedmetadata", () => { total.textContent = fmt(audio.duration); });
+    audio.addEventListener("durationchange", () => { total.textContent = fmt(audio.duration); });
+    audio.addEventListener("timeupdate", () => {
+      now.textContent = fmt(audio.currentTime);
+      slider.value = Number.isFinite(audio.duration) && audio.duration > 0 ? (audio.currentTime / audio.duration * 100).toFixed(1) : 0;
+    });
+    slider.addEventListener("input", () => {
+      if (Number.isFinite(audio.duration) && audio.duration > 0) audio.currentTime = audio.duration * slider.value / 100;
+    });
+    audio.addEventListener("error", () => {
+      title.textContent = "Falta subir invitacion.mp3";
+      btn.disabled = true;
+    });
+  </script>
 </body>
 </html>
